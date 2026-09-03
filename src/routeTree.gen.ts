@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as QuanLyDoiRouteImport } from './routes/quan-ly-doi'
+import { Route as TheThucRouteImport } from './routes/the-thuc'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const QuanLyDoiRoute = QuanLyDoiRouteImport.update({
   path: '/quan-ly-doi',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TheThucRoute = TheThucRouteImport.update({
+  id: '/the-thuc',
+  path: '/the-thuc',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/quan-ly-doi': typeof QuanLyDoiRoute
+  '/the-thuc': typeof TheThucRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/quan-ly-doi': typeof QuanLyDoiRoute
+  '/the-thuc': typeof TheThucRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/quan-ly-doi': typeof QuanLyDoiRoute
+  '/the-thuc': typeof TheThucRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/quan-ly-doi'
+  fullPaths: '/' | '/quan-ly-doi' | '/the-thuc'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/quan-ly-doi'
-  id: '__root__' | '/' | '/quan-ly-doi'
+  to: '/' | '/quan-ly-doi' | '/the-thuc'
+  id: '__root__' | '/' | '/quan-ly-doi' | '/the-thuc'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   QuanLyDoiRoute: typeof QuanLyDoiRoute
+  TheThucRoute: typeof TheThucRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuanLyDoiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/the-thuc': {
+      id: '/the-thuc'
+      path: '/the-thuc'
+      fullPath: '/the-thuc'
+      preLoaderRoute: typeof TheThucRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   QuanLyDoiRoute: QuanLyDoiRoute,
+  TheThucRoute: TheThucRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
