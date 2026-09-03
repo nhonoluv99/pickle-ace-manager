@@ -23,6 +23,7 @@ export type Match = {
 };
 export type FormatId = "group_knockout" | "round_robin" | "doi_dong_doi";
 export type PairMode = "random" | "fixed" | "manual_teams";
+export type RegFormat = "don" | "doi" | "dong_doi";
 
 export type TournamentState = {
   name: string;
@@ -31,6 +32,7 @@ export type TournamentState = {
   date: string;
   players: Player[];
   teams: Team[];
+  regFormat: RegFormat;
   teamSize: number;
   pairMode: PairMode;
   groupCount: number;
@@ -39,7 +41,7 @@ export type TournamentState = {
   matches: Match[];
 };
 
-const STORAGE_KEY = "nay-court-tournament-v1";
+const STORAGE_KEY = "nay-court-tournament-v2";
 
 const initialState: TournamentState = {
   name: "",
@@ -48,6 +50,7 @@ const initialState: TournamentState = {
   date: "",
   players: [],
   teams: [],
+  regFormat: "doi",
   teamSize: 2,
   pairMode: "random",
   groupCount: 2,
@@ -112,7 +115,7 @@ export function useTournament() {
 
 /* ---------- Logic bốc thăm & chia bảng ---------- */
 
-export function makePlayer(name: string, rating: number): Player {
+export function makePlayer(name: string, rating = 0): Player {
   return { id: uid(), name, rating };
 }
 
