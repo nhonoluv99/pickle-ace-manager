@@ -10,33 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as QuanLyDoiRouteImport } from './routes/quan-ly-doi'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QuanLyDoiRoute = QuanLyDoiRouteImport.update({
+  id: '/quan-ly-doi',
+  path: '/quan-ly-doi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/quan-ly-doi': typeof QuanLyDoiRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/quan-ly-doi': typeof QuanLyDoiRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/quan-ly-doi': typeof QuanLyDoiRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/quan-ly-doi'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/quan-ly-doi'
+  id: '__root__' | '/' | '/quan-ly-doi'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  QuanLyDoiRoute: typeof QuanLyDoiRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/quan-ly-doi': {
+      id: '/quan-ly-doi'
+      path: '/quan-ly-doi'
+      fullPath: '/quan-ly-doi'
+      preLoaderRoute: typeof QuanLyDoiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  QuanLyDoiRoute: QuanLyDoiRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
