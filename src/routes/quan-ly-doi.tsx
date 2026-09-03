@@ -8,6 +8,7 @@ import {
   splitGroups,
   useTournament,
   type PairMode,
+  type RegFormat,
 } from "@/lib/tournament-store";
 
 export const Route = createFileRoute("/quan-ly-doi")({
@@ -30,24 +31,81 @@ export const Route = createFileRoute("/quan-ly-doi")({
 });
 
 const MODES: Array<{ id: PairMode; label: string; desc: string }> = [
-  { id: "random", label: "Bốc thăm ngẫu nhiên", desc: "Ghép cặp cân bằng theo điểm trình." },
-  { id: "fixed", label: "Bắt cặp từ đầu", desc: "Ghép theo đúng thứ tự đã nhập." },
+  { id: "random", label: "Bốc thăm ngẫu nhiên", desc: "Bắt buộc nhập điểm trình từng VĐV." },
+  { id: "fixed", label: "Bắt cặp từ đầu", desc: "Nhập sẵn 2 VĐV của mỗi đội." },
   { id: "manual_teams", label: "Nhập tên đội", desc: "Tự nhập sẵn danh sách đội." },
 ];
+
+const REG_FORMATS: Array<{ id: RegFormat; label: string }> = [
+  { id: "don", label: "Đơn" },
+  { id: "doi", label: "Đôi" },
+  { id: "dong_doi", label: "Đồng đội" },
+];
+
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+function nextLabel(prefix: string, names: string[]) {
+  for (const l of LETTERS) {
+    const candidate = `${prefix} ${l}`;
+    if (!names.includes(candidate)) return candidate;
+  }
+  return `${prefix} ${names.length + 1}`;
+}
 
 function TeamsPage() {
   const { state, update } = useTournament();
   const [playerName, setPlayerName] = useState("");
-  const [rating, setRating] = useState("3.5");
+  const [rating, setRating] = useState("");
+  const [pairA, setPairA] = useState({ name: "", rating: "" });
+  const [pairB, setPairB] = useState({ name: "", rating: "" });
   const [teamName, setTeamName] = useState("");
   const [note, setNote] = useState("");
+
+  const num = (v: string) => {
+    const r = Number(v.replace(",", "."));
+    return Number.isFinite(r) ? r : 0;
+  };
+
+  const setRegFormat = (id: RegFormat) => {
+    const teamSize = id === "don" ? 1 : id === "doi" ? 2 : Math.max(2, state.teamSize);
+    const pairMode = id === "doi" ? state.pairMode : state.pairMode === "fixed" ? "random" : state.pairMode;
+    update({ regFormat: id, teamSize, pairMode, teams: [], groups: [], matches: [] });
+  };
 
   const addPlayer = () => {
     const name = playerName.trim();
     if (!name) return;
-    const r = Number(rating.replace(",", "."));
-    update({ players: [...state.players, makePlayer(name, Number.isFinite(r) ? r : 0)] });
+    if (state.pairMode === "random" && num(rating) <= 0) {
+      setNote("Chế độ bốc thăm ngẫu nhiên cần điểm trình cho mỗi VĐV.");
+      return;
+    }
+    update({ players: [...state.players, makePlayer(name, num(rating))] });
     setPlayerName("");
+    setRating("");
+    setNote("");
+  };
+
+  const addGendered = (prefix: "Nữ" | "Nam") => {
+    const name = nextLabel(
+      prefix,
+      state.players.map((p) => p.name),
+    );
+    update({ players: [...state.players, makePlayer(name, 0)] });
+  };
+
+  const addPair = () => {
+    const a = pairA.name.trim();
+    const b = pairB.name.trim();
+    if (!a || !b) {
+      setNote("Cần nhập đủ tên 2 VĐV trong một đội.");
+      return;
+    }
+    update({
+      players: [...state.players, makePlayer(a, num(pairA.rating)), makePlayer(b, num(pairB.rating))],
+    });
+    setPairA({ name: "", rating: "" });
+    setPairB({ name: "", rating: "" });
+    setNote("");
   };
 
   const addTeam = () => {
@@ -66,14 +124,13 @@ function TeamsPage() {
       groups: state.groups.map((g) => ({ ...g, teamIds: g.teamIds.filter((x) => x !== id) })),
     });
 
-  const setPlayerRating = (id: string, value: string) => {
-    const r = Number(value.replace(",", "."));
+  const setPlayerRating = (id: string, value: string) =>
     update({
-      players: state.players.map((p) =>
-        p.id === id ? { ...p, rating: Number.isFinite(r) ? r : 0 } : p,
-      ),
+      players: state.players.map((p) => (p.id === id ? { ...p, rating: num(value) } : p)),
     });
-  };
+
+  const setPlayerName2 = (id: string, value: string) =>
+    update({ players: state.players.map((p) => (p.id === id ? { ...p, name: value } : p)) });
 
   const draw = () => {
     if (state.pairMode === "manual_teams") {
@@ -82,6 +139,10 @@ function TeamsPage() {
     }
     if (state.players.length < state.teamSize) {
       setNote("Chưa đủ VĐV để bốc thăm.");
+      return;
+    }
+    if (state.pairMode === "random" && state.players.some((p) => p.rating <= 0)) {
+      setNote("Vui lòng nhập điểm trình cho tất cả VĐV trước khi bốc thăm.");
       return;
     }
     const teams =
@@ -103,6 +164,8 @@ function TeamsPage() {
   };
 
   const teamOf = (id: string) => state.teams.find((t) => t.id === id)?.name ?? "—";
+  const isTeamMode = state.regFormat === "dong_doi";
+  const isPairInput = state.regFormat === "doi" && state.pairMode === "fixed";
 
   return (
     <div className="grid gap-6 lg:grid-cols-12 lg:gap-8">
@@ -117,27 +180,42 @@ function TeamsPage() {
           <p className="text-[11px] font-semibold uppercase tracking-wide text-line/60">
             Thể thức đăng ký
           </p>
-          <div className="mt-2 flex gap-2">
-            {[1, 2, 4].map((n) => (
+          <div className="mt-2 flex items-center gap-2">
+            {REG_FORMATS.map((f) => (
               <button
-                key={n}
-                onClick={() => update({ teamSize: n })}
+                key={f.id}
+                onClick={() => setRegFormat(f.id)}
                 className={
-                  state.teamSize === n
+                  state.regFormat === f.id
                     ? "flex-1 rounded-lg bg-line px-3 py-2 text-sm font-semibold text-paper"
                     : "flex-1 rounded-lg bg-white/70 px-3 py-2 text-sm font-semibold text-line/70 ring-1 ring-black/5"
                 }
               >
-                {n === 1 ? "Đơn (1)" : `${n} người / đội`}
+                {f.label}
               </button>
             ))}
           </div>
+          {isTeamMode ? (
+            <div className="mt-2 flex items-center gap-2">
+              <label className="text-xs font-semibold uppercase tracking-wide text-line/60">
+                Số VĐV / đội
+              </label>
+              <input
+                className="field !w-20 !py-1.5 text-center"
+                inputMode="numeric"
+                value={String(state.teamSize)}
+                onChange={(e) =>
+                  update({ teamSize: Math.max(2, Math.min(12, Number(e.target.value) || 2)) })
+                }
+              />
+            </div>
+          ) : null}
 
           <p className="mt-4 text-[11px] font-semibold uppercase tracking-wide text-line/60">
             Cơ chế ghép đội
           </p>
           <div className="mt-2 space-y-2">
-            {MODES.map((m) => (
+            {MODES.filter((m) => m.id !== "fixed" || state.regFormat === "doi").map((m) => (
               <button
                 key={m.id}
                 onClick={() => update({ pairMode: m.id })}
@@ -176,29 +254,72 @@ function TeamsPage() {
         ) : (
           <div className="panel mt-4 p-4">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-line/60">
-              Thêm VĐV & điểm trình
+              {isPairInput ? "Thêm cặp VĐV" : "Thêm VĐV"}
+              {state.pairMode === "random" ? " & điểm trình (bắt buộc)" : " & điểm trình (tùy chọn)"}
             </p>
-            <div className="mt-2 flex gap-2">
-              <input
-                className="field"
-                placeholder="Tên VĐV"
-                maxLength={50}
-                value={playerName}
-                onChange={(e) => setPlayerName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addPlayer()}
-              />
-              <input
-                className="field !w-24"
-                placeholder="Trình"
-                inputMode="decimal"
-                maxLength={5}
-                value={rating}
-                onChange={(e) => setRating(e.target.value)}
-              />
-              <button className="btn-accent" onClick={addPlayer}>
-                Thêm
-              </button>
-            </div>
+
+            {isTeamMode ? (
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <button className="btn-ghost" onClick={() => addGendered("Nữ")}>
+                  + Nữ
+                </button>
+                <button className="btn-ghost" onClick={() => addGendered("Nam")}>
+                  + Nam
+                </button>
+              </div>
+            ) : null}
+
+            {isPairInput ? (
+              <div className="mt-2 space-y-2">
+                {[
+                  { v: pairA, set: setPairA, label: "VĐV 1" },
+                  { v: pairB, set: setPairB, label: "VĐV 2" },
+                ].map((row) => (
+                  <div key={row.label} className="flex gap-2">
+                    <input
+                      className="field"
+                      placeholder={row.label}
+                      maxLength={50}
+                      value={row.v.name}
+                      onChange={(e) => row.set({ ...row.v, name: e.target.value })}
+                    />
+                    <input
+                      className="field !w-24"
+                      placeholder="Trình"
+                      inputMode="decimal"
+                      maxLength={5}
+                      value={row.v.rating}
+                      onChange={(e) => row.set({ ...row.v, rating: e.target.value })}
+                    />
+                  </div>
+                ))}
+                <button className="btn-accent w-full" onClick={addPair}>
+                  Thêm đội
+                </button>
+              </div>
+            ) : (
+              <div className="mt-2 flex gap-2">
+                <input
+                  className="field"
+                  placeholder="Tên VĐV"
+                  maxLength={50}
+                  value={playerName}
+                  onChange={(e) => setPlayerName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && addPlayer()}
+                />
+                <input
+                  className="field !w-24"
+                  placeholder="Trình"
+                  inputMode="decimal"
+                  maxLength={5}
+                  value={rating}
+                  onChange={(e) => setRating(e.target.value)}
+                />
+                <button className="btn-accent" onClick={addPlayer}>
+                  Thêm
+                </button>
+              </div>
+            )}
 
             <div className="mt-3 divide-y divide-line/10 overflow-hidden rounded-xl bg-white/60 ring-1 ring-black/5">
               <div className="grid grid-cols-[1fr_5.5rem_2rem] items-center gap-2 border-b-2 border-line/10 px-3.5 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-line/60">
@@ -214,11 +335,17 @@ function TeamsPage() {
                     key={p.id}
                     className="grid grid-cols-[1fr_5.5rem_2rem] items-center gap-2 px-3.5 py-2.5"
                   >
-                    <span className="truncate text-base font-medium">{p.name}</span>
+                    <input
+                      className="w-full truncate rounded-md bg-transparent text-base font-medium outline-none"
+                      value={p.name}
+                      maxLength={50}
+                      onChange={(e) => setPlayerName2(p.id, e.target.value)}
+                    />
                     <input
                       className="w-full rounded-md bg-white/80 py-1 text-right font-head font-bold text-line ring-1 ring-black/5"
                       inputMode="decimal"
-                      value={String(p.rating)}
+                      placeholder="—"
+                      value={p.rating > 0 ? String(p.rating) : ""}
                       onChange={(e) => setPlayerRating(p.id, e.target.value)}
                     />
                     <button
