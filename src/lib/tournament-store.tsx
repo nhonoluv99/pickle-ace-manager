@@ -23,6 +23,7 @@ export type Match = {
 };
 export type FormatId = "group_knockout" | "round_robin" | "doi_dong_doi";
 export type PairMode = "random" | "fixed" | "manual_teams";
+export type RegFormat = "don" | "doi" | "dong_doi";
 
 export type TournamentState = {
   name: string;
@@ -31,6 +32,7 @@ export type TournamentState = {
   date: string;
   players: Player[];
   teams: Team[];
+  regFormat: RegFormat;
   teamSize: number;
   pairMode: PairMode;
   groupCount: number;
