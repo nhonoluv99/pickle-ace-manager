@@ -41,7 +41,7 @@ export type TournamentState = {
   matches: Match[];
 };
 
-const STORAGE_KEY = "nay-court-tournament-v1";
+const STORAGE_KEY = "nay-court-tournament-v2";
 
 const initialState: TournamentState = {
   name: "",
@@ -50,6 +50,7 @@ const initialState: TournamentState = {
   date: "",
   players: [],
   teams: [],
+  regFormat: "doi",
   teamSize: 2,
   pairMode: "random",
   groupCount: 2,
@@ -114,7 +115,7 @@ export function useTournament() {
 
 /* ---------- Logic bốc thăm & chia bảng ---------- */
 
-export function makePlayer(name: string, rating: number): Player {
+export function makePlayer(name: string, rating = 0): Player {
   return { id: uid(), name, rating };
 }
 
