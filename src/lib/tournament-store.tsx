@@ -44,7 +44,7 @@ const STORAGE_KEY = "nay-court-tournament-v1";
 const initialState: TournamentState = {
   name: "",
   courtCount: 2,
-  courts: ["Sân A", "Sân B"],
+  courts: ["Sân 1", "Sân 2"],
   date: "",
   players: [],
   teams: [],

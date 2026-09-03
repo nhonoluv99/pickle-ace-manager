@@ -44,8 +44,7 @@ function FormatPage() {
       <div className="lg:col-span-7">
         <div className="grid gap-4">
           <div>
-            <p className="eyebrow self-start">Trang 03 — Thể thức thi đấu</p>
-            <h1 className="mt-1 text-balance font-head text-4xl font-black uppercase leading-none tracking-tighter">
+            <h1 className="text-balance font-head text-4xl font-black uppercase leading-none tracking-tighter">
               Chọn thể thức
             </h1>
           </div>

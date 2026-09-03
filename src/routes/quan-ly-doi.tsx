@@ -108,8 +108,7 @@ function TeamsPage() {
     <div className="grid gap-6 lg:grid-cols-12 lg:gap-8">
       <div className="lg:col-span-5">
         <div className="grid gap-3">
-          <p className="eyebrow self-start">Trang 02 — Quản lý đội</p>
-          <h1 className="mt-1 text-balance font-head text-4xl font-black uppercase leading-none tracking-tighter">
+          <h1 className="text-balance font-head text-4xl font-black uppercase leading-none tracking-tighter">
             Danh sách VĐV
           </h1>
         </div>
