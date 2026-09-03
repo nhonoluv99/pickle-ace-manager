@@ -10,33 +10,63 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BangTySoRouteImport } from './routes/bang-ty-so'
+import { Route as QuanLyDoiRouteImport } from './routes/quan-ly-doi'
+import { Route as TheThucRouteImport } from './routes/the-thuc'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BangTySoRoute = BangTySoRouteImport.update({
+  id: '/bang-ty-so',
+  path: '/bang-ty-so',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuanLyDoiRoute = QuanLyDoiRouteImport.update({
+  id: '/quan-ly-doi',
+  path: '/quan-ly-doi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TheThucRoute = TheThucRouteImport.update({
+  id: '/the-thuc',
+  path: '/the-thuc',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bang-ty-so': typeof BangTySoRoute
+  '/quan-ly-doi': typeof QuanLyDoiRoute
+  '/the-thuc': typeof TheThucRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bang-ty-so': typeof BangTySoRoute
+  '/quan-ly-doi': typeof QuanLyDoiRoute
+  '/the-thuc': typeof TheThucRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/bang-ty-so': typeof BangTySoRoute
+  '/quan-ly-doi': typeof QuanLyDoiRoute
+  '/the-thuc': typeof TheThucRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/bang-ty-so' | '/quan-ly-doi' | '/the-thuc'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/bang-ty-so' | '/quan-ly-doi' | '/the-thuc'
+  id: '__root__' | '/' | '/bang-ty-so' | '/quan-ly-doi' | '/the-thuc'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BangTySoRoute: typeof BangTySoRoute
+  QuanLyDoiRoute: typeof QuanLyDoiRoute
+  TheThucRoute: typeof TheThucRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +78,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bang-ty-so': {
+      id: '/bang-ty-so'
+      path: '/bang-ty-so'
+      fullPath: '/bang-ty-so'
+      preLoaderRoute: typeof BangTySoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quan-ly-doi': {
+      id: '/quan-ly-doi'
+      path: '/quan-ly-doi'
+      fullPath: '/quan-ly-doi'
+      preLoaderRoute: typeof QuanLyDoiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/the-thuc': {
+      id: '/the-thuc'
+      path: '/the-thuc'
+      fullPath: '/the-thuc'
+      preLoaderRoute: typeof TheThucRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BangTySoRoute: BangTySoRoute,
+  QuanLyDoiRoute: QuanLyDoiRoute,
+  TheThucRoute: TheThucRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
