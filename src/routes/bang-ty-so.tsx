@@ -66,8 +66,7 @@ function ScorePage() {
       <div className="lg:col-span-7">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
-            <p className="eyebrow self-start">Trang 04 — Bảng tỷ số</p>
-            <h1 className="mt-1 text-balance font-head text-4xl font-black uppercase leading-none tracking-tighter">
+            <h1 className="text-balance font-head text-4xl font-black uppercase leading-none tracking-tighter">
               Nhập tỷ số
             </h1>
           </div>
