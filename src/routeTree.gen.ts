@@ -14,6 +14,7 @@ import { Route as BangTySoRouteImport } from './routes/bang-ty-so'
 import { Route as NoiDungRouteImport } from './routes/noi-dung'
 import { Route as QuanLyDoiRouteImport } from './routes/quan-ly-doi'
 import { Route as TheThucRouteImport } from './routes/the-thuc'
+import { Route as VanDongVienRouteImport } from './routes/van-dong-vien'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +41,11 @@ const TheThucRoute = TheThucRouteImport.update({
   path: '/the-thuc',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VanDongVienRoute = VanDongVienRouteImport.update({
+  id: '/van-dong-vien',
+  path: '/van-dong-vien',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/noi-dung': typeof NoiDungRoute
   '/quan-ly-doi': typeof QuanLyDoiRoute
   '/the-thuc': typeof TheThucRoute
+  '/van-dong-vien': typeof VanDongVienRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/noi-dung': typeof NoiDungRoute
   '/quan-ly-doi': typeof QuanLyDoiRoute
   '/the-thuc': typeof TheThucRoute
+  '/van-dong-vien': typeof VanDongVienRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,12 +70,25 @@ export interface FileRoutesById {
   '/noi-dung': typeof NoiDungRoute
   '/quan-ly-doi': typeof QuanLyDoiRoute
   '/the-thuc': typeof TheThucRoute
+  '/van-dong-vien': typeof VanDongVienRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/bang-ty-so' | '/noi-dung' | '/quan-ly-doi' | '/the-thuc'
+  fullPaths:
+    | '/'
+    | '/bang-ty-so'
+    | '/noi-dung'
+    | '/quan-ly-doi'
+    | '/the-thuc'
+    | '/van-dong-vien'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/bang-ty-so' | '/noi-dung' | '/quan-ly-doi' | '/the-thuc'
+  to:
+    | '/'
+    | '/bang-ty-so'
+    | '/noi-dung'
+    | '/quan-ly-doi'
+    | '/the-thuc'
+    | '/van-dong-vien'
   id:
     | '__root__'
     | '/'
@@ -75,6 +96,7 @@ export interface FileRouteTypes {
     | '/noi-dung'
     | '/quan-ly-doi'
     | '/the-thuc'
+    | '/van-dong-vien'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -83,6 +105,7 @@ export interface RootRouteChildren {
   NoiDungRoute: typeof NoiDungRoute
   QuanLyDoiRoute: typeof QuanLyDoiRoute
   TheThucRoute: typeof TheThucRoute
+  VanDongVienRoute: typeof VanDongVienRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -122,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TheThucRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/van-dong-vien': {
+      id: '/van-dong-vien'
+      path: '/van-dong-vien'
+      fullPath: '/van-dong-vien'
+      preLoaderRoute: typeof VanDongVienRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -131,6 +161,7 @@ const rootRouteChildren: RootRouteChildren = {
   NoiDungRoute: NoiDungRoute,
   QuanLyDoiRoute: QuanLyDoiRoute,
   TheThucRoute: TheThucRoute,
+  VanDongVienRoute: VanDongVienRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
