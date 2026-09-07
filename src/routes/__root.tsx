@@ -107,9 +107,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 const NAV = [
   { to: "/", label: "Tạo giải" },
-  { to: "/quan-ly-doi", label: "Quản lý đội" },
-  { to: "/the-thuc", label: "Thể thức" },
-  { to: "/bang-ty-so", label: "Bảng tỷ số" },
+  { to: "/noi-dung", label: "Nội dung" },
+  { to: "/van-dong-vien", label: "Danh sách VĐV" },
+  { to: "/quan-ly-giai", label: "Quản lý giải" },
 ] as const;
 
 function Header() {
