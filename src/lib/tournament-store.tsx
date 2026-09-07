@@ -27,6 +27,9 @@ export type MatchStatus = "pending" | "live" | "done";
 export type LiveState = {
   scoring: "rally" | "sideout" | "manual";
   target: number;
+  winBy2: boolean;
+  timeoutSeconds: number;
+  medicalSeconds: number;
   timeoutsPerTeam: number;
   serveTeam: 0 | 1;
   serverNum: 1 | 2;
@@ -82,6 +85,10 @@ export type TournamentState = {
   date: string;
   venue: string;
   venueName: string;
+  /** Giờ bắt đầu ngày thi đấu, dạng HH:mm — dùng cho bảng timeline. */
+  startTime: string;
+  /** Số phút mỗi khung giờ trên timeline. */
+  slotMinutes: number;
   courts: string[];
   events: TEvent[];
   entries: Entry[];
@@ -114,6 +121,8 @@ const initialState: TournamentState = {
   date: "",
   venue: "",
   venueName: "",
+  startTime: "08:00",
+  slotMinutes: 30,
   courts: ["Sân 1", "Sân 2"],
   events: [],
   entries: [],
@@ -512,3 +521,62 @@ export const BRACKET_LABEL: Record<BracketType, string> = {
   rr: "Vòng tròn",
   rr_ko: "Chia bảng + loại trực tiếp",
 };
+
+/* ---------------- Màu bảng & timeline ---------------- */
+
+const GROUP_COLORS = [
+  { bg: "oklch(0.955 0.03 25)", text: "oklch(0.5 0.19 25)", dot: "oklch(0.6 0.2 25)" },
+  { bg: "oklch(0.95 0.035 250)", text: "oklch(0.48 0.16 255)", dot: "oklch(0.58 0.17 255)" },
+  { bg: "oklch(0.95 0.05 155)", text: "oklch(0.45 0.13 155)", dot: "oklch(0.56 0.14 155)" },
+  { bg: "oklch(0.955 0.055 70)", text: "oklch(0.52 0.15 60)", dot: "oklch(0.66 0.17 55)" },
+  { bg: "oklch(0.95 0.04 300)", text: "oklch(0.48 0.15 300)", dot: "oklch(0.58 0.16 300)" },
+  { bg: "oklch(0.95 0.05 195)", text: "oklch(0.45 0.12 200)", dot: "oklch(0.56 0.13 200)" },
+  { bg: "oklch(0.95 0.05 110)", text: "oklch(0.46 0.13 115)", dot: "oklch(0.58 0.14 115)" },
+  { bg: "oklch(0.95 0.04 340)", text: "oklch(0.5 0.16 345)", dot: "oklch(0.6 0.17 345)" },
+];
+
+/** Màu cố định cho từng bảng / vòng, để nhìn lịch dễ phân biệt. */
+export function groupColor(name: string) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  const letter = /Bảng ([A-H])/.exec(name)?.[1];
+  const idx = letter ? GROUP_LETTERS.indexOf(letter) : h % GROUP_COLORS.length;
+  return GROUP_COLORS[(idx + GROUP_COLORS.length) % GROUP_COLORS.length]!;
+}
+
+/** Nhãn ngắn của bảng, ví dụ "Bảng A" -> "A". */
+export function groupTag(name: string) {
+  return /Bảng ([A-H])/.exec(name)?.[1] ?? name.slice(0, 2).toUpperCase();
+}
+
+export function addMinutes(hhmm: string, mins: number): string {
+  const [h = 8, m = 0] = hhmm.split(":").map(Number);
+  const total = (h * 60 + m + mins + 24 * 60) % (24 * 60);
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
+export type Slotted = { match: Match; slot: number };
+
+/**
+ * Xếp các trận lên lưới thời gian: mỗi sân là một hàng, mỗi khung giờ là một cột.
+ * Trận cùng vòng được xếp cùng khung giờ khi sân còn trống.
+ */
+export function buildTimeline(matches: Match[], courts: string[]): Map<string, Slotted[]> {
+  const grid = new Map<string, Slotted[]>();
+  courts.forEach((c) => grid.set(c, []));
+  const used = new Map<string, Set<number>>();
+  const sorted = [...matches].sort(
+    (a, b) => a.round - b.round || a.groupName.localeCompare(b.groupName),
+  );
+  sorted.forEach((m) => {
+    const court = grid.has(m.court) ? m.court : (courts[0] ?? m.court);
+    if (!grid.has(court)) grid.set(court, []);
+    const taken = used.get(court) ?? new Set<number>();
+    let slot = m.round - 1;
+    while (taken.has(slot)) slot++;
+    taken.add(slot);
+    used.set(court, taken);
+    grid.get(court)!.push({ match: m, slot });
+  });
+  return grid;
+}

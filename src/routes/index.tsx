@@ -62,12 +62,14 @@ function CreateTournamentPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1
-        className="overflow-hidden text-balance whitespace-nowrap font-head font-black uppercase leading-none tracking-tighter"
-        style={{ fontSize: `${titleSize}rem` }}
-      >
-        {title}
-      </h1>
+      <div className="flex h-[4.75rem] items-end">
+        <h1
+          className="w-full truncate whitespace-nowrap font-head font-black uppercase tracking-tighter"
+          style={{ fontSize: `${titleSize}rem`, lineHeight: 1.18 }}
+        >
+          {title}
+        </h1>
+      </div>
 
       <div className="mt-8 space-y-4">
         <div>
