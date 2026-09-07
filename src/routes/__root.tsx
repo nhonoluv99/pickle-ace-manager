@@ -175,7 +175,10 @@ function RootComponent() {
             </div>
             <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 pb-8 text-xs font-medium text-line/50 sm:px-6">
               <span className="size-2 shrink-0 rounded-full bg-accent" />
-              <span>Nảy Court · Bảng xếp hạng cập nhật tự động sau mỗi trận</span>
+              <span>
+                Nảy Court . Hệ thống quản lý điều hành giải chuyên nghiệp, hiện đại, đầy khả ái và
+                ngây ngất lòng người...
+              </span>
             </div>
           </div>
         </div>
