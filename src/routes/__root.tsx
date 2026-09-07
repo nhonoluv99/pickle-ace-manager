@@ -107,9 +107,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 const NAV = [
   { to: "/", label: "Tạo giải" },
-  { to: "/quan-ly-doi", label: "Quản lý đội" },
-  { to: "/the-thuc", label: "Thể thức" },
-  { to: "/bang-ty-so", label: "Bảng tỷ số" },
+  { to: "/noi-dung", label: "Nội dung" },
+  { to: "/van-dong-vien", label: "Danh sách VĐV" },
+  { to: "/quan-ly-giai", label: "Quản lý giải" },
 ] as const;
 
 function Header() {
@@ -175,7 +175,10 @@ function RootComponent() {
             </div>
             <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 pb-8 text-xs font-medium text-line/50 sm:px-6">
               <span className="size-2 shrink-0 rounded-full bg-accent" />
-              <span>Nảy Court · Bảng xếp hạng cập nhật tự động sau mỗi trận</span>
+              <span>
+                Nảy Court . Hệ thống quản lý điều hành giải chuyên nghiệp, hiện đại, đầy khả ái và
+                ngây ngất lòng người...
+              </span>
             </div>
           </div>
         </div>
