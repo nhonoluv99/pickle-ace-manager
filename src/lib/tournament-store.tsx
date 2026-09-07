@@ -27,6 +27,9 @@ export type MatchStatus = "pending" | "live" | "done";
 export type LiveState = {
   scoring: "rally" | "sideout" | "manual";
   target: number;
+  winBy2: boolean;
+  timeoutSeconds: number;
+  medicalSeconds: number;
   timeoutsPerTeam: number;
   serveTeam: 0 | 1;
   serverNum: 1 | 2;
@@ -82,6 +85,10 @@ export type TournamentState = {
   date: string;
   venue: string;
   venueName: string;
+  /** Giờ bắt đầu ngày thi đấu, dạng HH:mm — dùng cho bảng timeline. */
+  startTime: string;
+  /** Số phút mỗi khung giờ trên timeline. */
+  slotMinutes: number;
   courts: string[];
   events: TEvent[];
   entries: Entry[];
@@ -114,6 +121,8 @@ const initialState: TournamentState = {
   date: "",
   venue: "",
   venueName: "",
+  startTime: "08:00",
+  slotMinutes: 30,
   courts: ["Sân 1", "Sân 2"],
   events: [],
   entries: [],
