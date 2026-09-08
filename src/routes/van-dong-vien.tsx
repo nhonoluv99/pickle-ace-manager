@@ -52,7 +52,7 @@ function PlayersPage() {
   if (!ev) {
     return (
       <div className="max-w-xl">
-        <h1 className="font-head text-4xl font-black uppercase tracking-tighter">Danh sách VĐV</h1>
+        <h1 className="font-head text-4xl font-bold uppercase tracking-tighter">Danh sách VĐV</h1>
         <p className="mt-3 text-sm text-line/60">
           Chưa có nội dung nào. Hãy tạo nội dung thi đấu trước.
         </p>
@@ -143,7 +143,7 @@ function PlayersPage() {
 
   return (
     <div>
-      <h1 className="text-balance font-head text-4xl font-black uppercase leading-none tracking-tighter">
+      <h1 className="text-balance font-head text-4xl font-bold uppercase leading-none tracking-tighter">
         Danh sách VĐV
       </h1>
 
@@ -285,7 +285,7 @@ function PlayersPage() {
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {ev.groups.map((g, gi) => (
               <div key={g.name} className="panel p-3">
-                <p className="font-head text-lg font-black uppercase tracking-tight">{g.name}</p>
+                <p className="font-head text-lg font-bold uppercase tracking-tight">{g.name}</p>
                 <div className="mt-2 space-y-1.5">
                   {g.entryIds.length === 0 ? (
                     <p className="text-xs text-line/40">Trống</p>

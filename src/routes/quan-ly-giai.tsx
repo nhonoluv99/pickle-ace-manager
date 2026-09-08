@@ -49,7 +49,7 @@ function ManagePage() {
   if (!ev) {
     return (
       <div className="max-w-xl">
-        <h1 className="font-head text-4xl font-black uppercase tracking-tighter">
+        <h1 className="font-head text-4xl font-bold uppercase tracking-tighter">
           Quản lý giải đấu
         </h1>
         <p className="mt-3 text-sm text-line/60">Chưa có nội dung nào để điều hành.</p>
@@ -206,7 +206,7 @@ function ManagePage() {
 
   return (
     <div>
-      <h1 className="text-balance font-head text-4xl font-black uppercase leading-none tracking-tighter">
+      <h1 className="text-balance font-head text-4xl font-bold uppercase leading-none tracking-tighter">
         Quản lý giải đấu
       </h1>
 
@@ -297,7 +297,7 @@ function ManagePage() {
             );
             return (
               <div key={g.name} className="panel mt-3 overflow-hidden">
-                <p className="px-3 pt-3 font-head text-lg font-black uppercase tracking-tight">
+                <p className="px-3 pt-3 font-head text-lg font-bold uppercase tracking-tight">
                   {g.name}
                 </p>
                 <table className="mt-2 w-full text-sm">

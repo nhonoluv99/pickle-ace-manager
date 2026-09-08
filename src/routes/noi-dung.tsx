@@ -77,7 +77,7 @@ function EventsPage() {
 
   return (
     <div className="max-w-4xl">
-      <h1 className="text-balance font-head text-4xl font-black uppercase leading-none tracking-tighter">
+      <h1 className="text-balance font-head text-4xl font-bold uppercase leading-none tracking-tighter">
         Nội dung thi đấu
       </h1>
       <p className="mt-2 max-w-xl text-sm text-line/60">

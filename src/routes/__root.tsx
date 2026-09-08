@@ -17,7 +17,7 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-paper px-4">
       <div className="max-w-md text-center">
-        <h1 className="font-head text-7xl font-black uppercase tracking-tighter text-ink">404</h1>
+        <h1 className="font-head text-7xl font-bold uppercase tracking-tighter text-ink">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-ink">Không tìm thấy trang</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Trang bạn tìm không tồn tại hoặc đã được chuyển đi.
@@ -42,7 +42,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-paper px-4">
       <div className="max-w-md text-center">
-        <h1 className="font-head text-xl font-black uppercase tracking-tight text-ink">
+        <h1 className="font-head text-xl font-bold uppercase tracking-tight text-ink">
           Trang không tải được
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">Bạn có thể thử lại hoặc quay về đầu.</p>
@@ -119,12 +119,12 @@ function Header() {
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <Link to="/" className="flex items-center gap-3">
           <div className="grid size-9 place-items-center rounded-lg bg-accent">
-            <span className="font-head text-lg font-black italic leading-none text-accent-foreground">
+            <span className="font-head text-lg font-bold leading-none text-accent-foreground">
               P
             </span>
           </div>
           <div className="leading-none">
-            <p className="font-head text-lg font-black uppercase italic tracking-tight">
+            <p className="font-head text-lg font-bold uppercase tracking-tight">
               Nảy Court
             </p>
             <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-line/60">

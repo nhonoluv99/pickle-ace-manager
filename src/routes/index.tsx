@@ -64,7 +64,7 @@ function CreateTournamentPage() {
     <div className="max-w-2xl">
       <div className="flex h-[4.75rem] items-end">
         <h1
-          className="w-full truncate whitespace-nowrap font-head font-black uppercase tracking-tighter"
+          className="w-full truncate whitespace-nowrap font-head font-bold uppercase tracking-tighter"
           style={{ fontSize: `${titleSize}rem`, lineHeight: 1.18 }}
         >
           {title}
@@ -164,7 +164,7 @@ function CreateTournamentPage() {
               >
                 −
               </button>
-              <span className="w-8 text-center font-head text-lg font-black">
+              <span className="w-8 text-center font-head text-lg font-bold">
                 {state.courts.length}
               </span>
               <button
