@@ -49,6 +49,8 @@ export type Match = {
   stage: "group" | "ko";
   groupName: string;
   round: number;
+  /** Cột khung giờ trên bảng timeline (0 = khung đầu tiên). */
+  timeSlot?: number;
   koRound?: string;
   slot?: number;
   aId: string | null;
@@ -591,7 +593,7 @@ export function buildTimeline(matches: Match[], courts: string[]): Map<string, S
     const court = grid.has(m.court) ? m.court : (courts[0] ?? m.court);
     if (!grid.has(court)) grid.set(court, []);
     const taken = used.get(court) ?? new Set<number>();
-    let slot = m.round - 1;
+    let slot = m.timeSlot ?? m.round - 1;
     while (taken.has(slot)) slot++;
     taken.add(slot);
     used.set(court, taken);
