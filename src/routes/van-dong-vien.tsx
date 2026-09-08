@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   drawPairs,
   entryName,
@@ -52,7 +52,7 @@ function PlayersPage() {
   if (!ev) {
     return (
       <div className="max-w-xl">
-        <h1 className="font-head text-4xl font-black uppercase tracking-tighter">Danh sách VĐV</h1>
+        <h1 className="font-head text-4xl font-bold uppercase tracking-tighter">Danh sách VĐV</h1>
         <p className="mt-3 text-sm text-line/60">
           Chưa có nội dung nào. Hãy tạo nội dung thi đấu trước.
         </p>
@@ -118,10 +118,7 @@ function PlayersPage() {
   };
 
   const doDraw = () => {
-    if (entries.some((e) => e.players.some((p) => p.name.trim() && p.rating === null))) {
-      setNote("Bốc thăm ngẫu nhiên cần điểm trình cho tất cả VĐV.");
-      return;
-    }
+    // Điểm trình là tuỳ chọn: ai chưa có điểm sẽ được xem như 0 khi cân bằng cặp.
     const paired = drawPairs(entries, ev.id);
     setEntries(paired);
     setNote(`Đã bốc thăm ${paired.length} đội.`);
@@ -143,7 +140,7 @@ function PlayersPage() {
 
   return (
     <div>
-      <h1 className="text-balance font-head text-4xl font-black uppercase leading-none tracking-tighter">
+      <h1 className="text-balance font-head text-4xl font-bold uppercase leading-none tracking-tighter">
         Danh sách VĐV
       </h1>
 
@@ -210,14 +207,9 @@ function PlayersPage() {
                           value={p.name}
                           onChange={(e) => patchPlayer(en.id, pi, { name: e.target.value })}
                         />
-                        <input
-                          className="field w-20 shrink-0 text-center"
-                          placeholder="—"
-                          inputMode="decimal"
-                          value={p.rating ?? ""}
-                          onChange={(e) =>
-                            patchPlayer(en.id, pi, { rating: num(e.target.value) })
-                          }
+                        <RatingInput
+                          value={p.rating}
+                          onChange={(rating) => patchPlayer(en.id, pi, { rating })}
                         />
                       </div>
                     ))}
@@ -285,7 +277,7 @@ function PlayersPage() {
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {ev.groups.map((g, gi) => (
               <div key={g.name} className="panel p-3">
-                <p className="font-head text-lg font-black uppercase tracking-tight">{g.name}</p>
+                <p className="font-head text-lg font-bold uppercase tracking-tight">{g.name}</p>
                 <div className="mt-2 space-y-1.5">
                   {g.entryIds.length === 0 ? (
                     <p className="text-xs text-line/40">Trống</p>
@@ -350,6 +342,33 @@ function PlayersPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function RatingInput({
+  value,
+  onChange,
+}: {
+  value: number | null;
+  onChange: (v: number | null) => void;
+}) {
+  const [raw, setRaw] = useState(value === null ? "" : String(value));
+  useEffect(() => {
+    if (num(raw) !== value) setRaw(value === null ? "" : String(value));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+  return (
+    <input
+      className="field w-20 shrink-0 text-center"
+      placeholder="—"
+      inputMode="decimal"
+      value={raw}
+      onChange={(e) => {
+        const t = e.target.value.replace(/[^0-9.,]/g, "");
+        setRaw(t);
+        onChange(num(t));
+      }}
+    />
   );
 }
 

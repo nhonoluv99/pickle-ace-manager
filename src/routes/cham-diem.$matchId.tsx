@@ -112,7 +112,7 @@ function LiveScoringPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-line/60">
           Chấm điểm trực tiếp
         </p>
-        <h1 className="mt-1 font-head text-2xl font-black uppercase tracking-tight">
+        <h1 className="mt-1 font-head text-2xl font-bold uppercase tracking-tight">
           {entryName(teamA)} <span className="text-line/40">vs</span> {entryName(teamB)}
         </h1>
 
@@ -164,7 +164,7 @@ function LiveScoringPage() {
               active={live.serveTeam === i}
               onClick={() => setLive({ serveTeam: i as 0 | 1 })}
             >
-              <span className="font-head italic">{n}</span>
+              <span className="font-head">{n}</span>
             </Chip>
           ))}
         </div>
@@ -206,7 +206,7 @@ function LiveScoringPage() {
         </div>
 
         <button
-          className="mt-6 w-full rounded-lg bg-courtdeep py-4 font-head text-lg font-black uppercase tracking-wide text-paper"
+          className="mt-6 w-full rounded-lg bg-courtdeep py-4 font-head text-lg font-bold uppercase tracking-wide text-paper"
           onClick={() => {
             updateMatch(match.id, {
               status: "live",
@@ -289,7 +289,7 @@ function LiveScoringPage() {
       </div>
 
       <div className="bg-line/5 py-4 text-center">
-        <p className="font-head text-5xl font-black tracking-tight">
+        <p className="font-head text-5xl font-bold tracking-tight">
           {live.serveTeam === 0 ? live.a : live.b}-{live.serveTeam === 0 ? live.b : live.a}
           {isSideout && doubles ? `-${live.serverNum}` : ""}
         </p>
@@ -306,7 +306,7 @@ function LiveScoringPage() {
           className="flex flex-col items-center justify-center bg-court/12 transition hover:bg-court/20"
           onClick={() => (isSideout ? scoreForServing() : pointFor(0))}
         >
-          <span className="font-head text-5xl font-black uppercase tracking-tight text-courtdeep">
+          <span className="font-head text-5xl font-bold uppercase tracking-tight text-courtdeep">
             Điểm
           </span>
           <span className="mt-2 text-xs text-line/60">
@@ -317,7 +317,7 @@ function LiveScoringPage() {
           className="flex flex-col items-center justify-center bg-white/60 transition hover:bg-white"
           onClick={() => (isSideout ? sideOut() : pointFor(1))}
         >
-          <span className="font-head text-5xl font-black uppercase tracking-tight">
+          <span className="font-head text-5xl font-bold uppercase tracking-tight">
             {isSideout ? "Mất giao" : "Điểm"}
           </span>
           <span className="mt-2 text-xs text-line/60">
@@ -355,7 +355,7 @@ function LiveScoringPage() {
           {winner ? `Thắng: ${winner}` : `tới ${live.target}`}
         </span>
         <button
-          className="rounded-lg bg-courtdeep font-head text-base font-black uppercase tracking-wide text-paper"
+          className="rounded-lg bg-courtdeep font-head text-base font-bold uppercase tracking-wide text-paper"
           onClick={() => finish(match, live.a, live.b)}
         >
           Kết thúc
