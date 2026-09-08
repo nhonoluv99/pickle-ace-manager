@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   drawPairs,
   entryName,
@@ -342,6 +342,33 @@ function PlayersPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function RatingInput({
+  value,
+  onChange,
+}: {
+  value: number | null;
+  onChange: (v: number | null) => void;
+}) {
+  const [raw, setRaw] = useState(value === null ? "" : String(value));
+  useEffect(() => {
+    if (num(raw) !== value) setRaw(value === null ? "" : String(value));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+  return (
+    <input
+      className="field w-20 shrink-0 text-center"
+      placeholder="—"
+      inputMode="decimal"
+      value={raw}
+      onChange={(e) => {
+        const t = e.target.value.replace(/[^0-9.,]/g, "");
+        setRaw(t);
+        onChange(num(t));
+      }}
+    />
   );
 }
 
