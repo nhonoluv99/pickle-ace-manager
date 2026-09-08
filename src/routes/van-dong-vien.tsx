@@ -118,10 +118,7 @@ function PlayersPage() {
   };
 
   const doDraw = () => {
-    if (entries.some((e) => e.players.some((p) => p.name.trim() && p.rating === null))) {
-      setNote("Bốc thăm ngẫu nhiên cần điểm trình cho tất cả VĐV.");
-      return;
-    }
+    // Điểm trình là tuỳ chọn: ai chưa có điểm sẽ được xem như 0 khi cân bằng cặp.
     const paired = drawPairs(entries, ev.id);
     setEntries(paired);
     setNote(`Đã bốc thăm ${paired.length} đội.`);
@@ -210,14 +207,9 @@ function PlayersPage() {
                           value={p.name}
                           onChange={(e) => patchPlayer(en.id, pi, { name: e.target.value })}
                         />
-                        <input
-                          className="field w-20 shrink-0 text-center"
-                          placeholder="—"
-                          inputMode="decimal"
-                          value={p.rating ?? ""}
-                          onChange={(e) =>
-                            patchPlayer(en.id, pi, { rating: num(e.target.value) })
-                          }
+                        <RatingInput
+                          value={p.rating}
+                          onChange={(rating) => patchPlayer(en.id, pi, { rating })}
                         />
                       </div>
                     ))}
