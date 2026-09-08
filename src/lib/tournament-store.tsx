@@ -404,18 +404,37 @@ export function generateKnockout(
     ),
   }));
 
-  const seeds: string[] = [];
+  // Các "tầng" theo thứ hạng: tầng 0 = nhất bảng, tầng 1 = nhì bảng...
+  const layers: string[][] = [];
   for (let pos = 0; pos < ev.advancePerGroup; pos++) {
-    const layer = byGroup.map((g) => g.rows[pos]).filter(Boolean) as StandingRow[];
-    layer.sort((a, b) => b.points - a.points || b.diff - a.diff || b.pointsFor - a.pointsFor);
-    if (pos % 2 === 1) layer.reverse();
-    layer.forEach((r) => seeds.push(r.entryId));
+    layers.push(
+      byGroup.map((g) => g.rows[pos]?.entryId).filter((x): x is string => Boolean(x)),
+    );
   }
-  if (seeds.length < 2) return [];
+  const firsts = layers[0] ?? [];
+  const seconds = layers[1] ?? [];
+  const rest = layers.slice(2).flat();
 
-  let size = 2;
-  while (size < seeds.length) size *= 2;
-  const slots: Array<string | null> = Array.from({ length: size }, (_, i) => seeds[i] ?? null);
+  // Nhất bảng này gặp nhì bảng kia (cross-bracket).
+  const pairs: Array<[string | null, string | null]> = [];
+  if (seconds.length > 0) {
+    firsts.forEach((f, i) => pairs.push([f, seconds[(i + 1) % seconds.length] ?? null]));
+  } else {
+    for (let i = 0; i < firsts.length; i += 2) pairs.push([firsts[i]!, firsts[i + 1] ?? null]);
+  }
+  for (let i = 0; i < rest.length; i += 2) pairs.push([rest[i]!, rest[i + 1] ?? null]);
+
+  const teamCount = pairs.flat().filter(Boolean).length;
+  if (teamCount < 2) return [];
+
+  let firstRoundMatches = 1;
+  while (firstRoundMatches < pairs.length) firstRoundMatches *= 2;
+  const size = firstRoundMatches * 2;
+  const slots: Array<string | null> = Array.from({ length: size }, () => null);
+  pairs.forEach(([a, b], i) => {
+    slots[i * 2] = a ?? null;
+    slots[i * 2 + 1] = b ?? null;
+  });
 
   const courtList = courts.length ? courts : ["Sân 1"];
   const matches: Match[] = [];
