@@ -73,7 +73,7 @@ type CardProps = {
   courts: string[];
   onCourt: (c: string) => void;
   onReferee: (r: string) => void;
-  compact?: boolean;
+  compact?: boolean | undefined;
 };
 
 function MatchCard({
@@ -252,11 +252,11 @@ function ManagePage() {
   };
 
   const resetMatch = (m: Match) => {
-    const patched = state.matches.map((x) =>
-      x.id === m.id
-        ? { ...x, scoreA: null, scoreB: null, status: "pending" as const, live: undefined }
-        : x,
-    );
+    const patched: Match[] = state.matches.map((x) => {
+      if (x.id !== m.id) return x;
+      const { live: _live, ...rest } = x;
+      return { ...rest, scoreA: null, scoreB: null, status: "pending" as const };
+    });
     update({ matches: propagateKnockout(patched, ev.id) });
   };
 
