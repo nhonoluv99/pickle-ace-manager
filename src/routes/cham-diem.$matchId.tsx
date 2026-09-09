@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   entryName,
   propagateKnockout,
@@ -30,6 +30,9 @@ export const Route = createFileRoute("/cham-diem/$matchId")({
 const defaultLive = (): LiveState => ({
   scoring: "sideout",
   target: 11,
+  winBy2: true,
+  timeoutSeconds: 60,
+  medicalSeconds: 900,
   timeoutsPerTeam: 1,
   serveTeam: 0,
   serverNum: 2,
@@ -76,6 +79,22 @@ function LiveScoringPage() {
   const navigate = useNavigate();
   const match = state.matches.find((m) => m.id === matchId);
   const [started, setStarted] = useState(match?.status === "live" && !!match.live);
+  const [tossing, setTossing] = useState(false);
+  const [tossFlash, setTossFlash] = useState<0 | 1>(0);
+  const [tossed, setTossed] = useState(match?.status === "live" && !!match.live);
+  const [timer, setTimer] = useState<{ label: string; left: number } | null>(null);
+  const [noteOpen, setNoteOpen] = useState(false);
+  const [changeover, setChangeover] = useState(false);
+  const [coDone, setCoDone] = useState(false);
+  const [endAsk, setEndAsk] = useState(false);
+  const endDismissed = useRef(false);
+
+  useEffect(() => {
+    if (!timer) return;
+    if (timer.left <= 0) return;
+    const id = setTimeout(() => setTimer({ ...timer, left: timer.left - 1 }), 1000);
+    return () => clearTimeout(id);
+  }, [timer]);
 
   if (!match) {
     return (
@@ -156,27 +175,87 @@ function LiveScoringPage() {
           ))}
         </div>
 
-        <Lbl>Đội giao bóng trước?</Lbl>
+        <Lbl>Cách biệt 2 điểm?</Lbl>
         <div className="mt-2 grid grid-cols-2 gap-2">
-          {[entryName(teamA), entryName(teamB)].map((n, i) => (
-            <Chip
-              key={n + i}
-              active={live.serveTeam === i}
-              onClick={() => setLive({ serveTeam: i as 0 | 1 })}
-            >
-              <span className="font-head">{n}</span>
-            </Chip>
-          ))}
+          <Chip active={live.winBy2} onClick={() => setLive({ winBy2: true })}>
+            Có — phải cách 2
+          </Chip>
+          <Chip active={!live.winBy2} onClick={() => setLive({ winBy2: false })}>
+            Không — chạm là thắng
+          </Chip>
+        </div>
+
+        <Lbl>Thời gian hội ý / y tế</Lbl>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <label className="flex items-center justify-between gap-2 rounded-lg bg-card px-3 py-2 text-sm ring-1 ring-line/20">
+            Hội ý (giây)
+            <input
+              type="number"
+              className="w-20 rounded-md bg-secondary px-2 py-1 text-center font-bold outline-none"
+              value={live.timeoutSeconds}
+              onChange={(e) => setLive({ timeoutSeconds: Math.max(5, Number(e.target.value) || 60) })}
+            />
+          </label>
+          <label className="flex items-center justify-between gap-2 rounded-lg bg-card px-3 py-2 text-sm ring-1 ring-line/20">
+            Y tế (phút)
+            <input
+              type="number"
+              className="w-20 rounded-md bg-secondary px-2 py-1 text-center font-bold outline-none"
+              value={Math.round(live.medicalSeconds / 60)}
+              onChange={(e) =>
+                setLive({ medicalSeconds: Math.max(1, Number(e.target.value) || 15) * 60 })
+              }
+            />
+          </label>
+        </div>
+
+        <Lbl>Tung đồng xu chọn đội giao bóng</Lbl>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          {[entryName(teamA), entryName(teamB)].map((n, i) => {
+            const highlight = tossing ? tossFlash === i : tossed && live.serveTeam === i;
+            return (
+              <div
+                key={n + i}
+                className={
+                  highlight
+                    ? "rounded-lg bg-accent/20 px-4 py-4 text-center font-head text-sm font-bold ring-2 ring-accent"
+                    : "rounded-lg bg-card px-4 py-4 text-center font-head text-sm font-bold text-line/50 ring-1 ring-line/20"
+                }
+              >
+                {n}
+              </div>
+            );
+          })}
         </div>
         <div className="mt-2 flex justify-center">
           <button
-            className="btn-ghost"
-            onClick={() => setLive({ serveTeam: (Math.random() < 0.5 ? 0 : 1) as 0 | 1 })}
+            className="btn-accent"
+            disabled={tossing}
+            onClick={() => {
+              setTossing(true);
+              setTossed(false);
+              let n = 0;
+              const tick = () => {
+                setTossFlash((f) => (f === 0 ? 1 : 0));
+                n += 1;
+                if (n < 18) setTimeout(tick, 60 + n * 8);
+                else {
+                  const r: 0 | 1 = Math.random() < 0.5 ? 0 : 1;
+                  setTossFlash(r);
+                  setLive({ serveTeam: r });
+                  setTossing(false);
+                  setTossed(true);
+                }
+              };
+              tick();
+            }}
           >
-            🎲 Tung đồng xu
+            🎲 {tossing ? "Đang tung..." : "Tung đồng xu"}
           </button>
         </div>
 
+        {tossed ? (
+        <>
         <Lbl>Ai giao bóng trước?</Lbl>
         <p className="text-center text-xs text-line/50">
           {live.serveTeam === 0 ? entryName(teamA) : entryName(teamB)}
@@ -205,8 +284,16 @@ function LiveScoringPage() {
           ))}
         </div>
 
+        </>
+        ) : (
+          <p className="mt-4 text-center text-xs text-line/50">
+            Tung đồng xu để chọn đội giao bóng, sau đó chọn người giao và người nhận.
+          </p>
+        )}
+
         <button
-          className="mt-6 w-full rounded-lg bg-courtdeep py-4 font-head text-lg font-bold uppercase tracking-wide text-paper"
+          disabled={!tossed}
+          className="mt-6 w-full rounded-lg bg-courtdeep py-4 disabled:opacity-40 font-head text-lg font-bold uppercase tracking-wide text-paper"
           onClick={() => {
             updateMatch(match.id, {
               status: "live",
@@ -230,7 +317,8 @@ function LiveScoringPage() {
   const doubles = namesA.length > 1;
   const isSideout = live.scoring === "sideout";
   const winner =
-    Math.max(live.a, live.b) >= live.target && Math.abs(live.a - live.b) >= 2
+    Math.max(live.a, live.b) >= live.target &&
+    (!live.winBy2 || Math.abs(live.a - live.b) >= 2)
       ? live.a > live.b
         ? entryName(teamA)
         : entryName(teamB)
