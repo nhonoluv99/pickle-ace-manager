@@ -339,13 +339,38 @@ function LiveScoringPage() {
       ],
     });
 
-  const pointFor = (team: 0 | 1) =>
-    push(team === 0 ? { a: live.a + 1 } : { b: live.b + 1 });
+  const coPoint = live.target === 11 ? 6 : live.target === 15 ? 8 : Math.ceil(live.target / 2);
+
+  const afterScore = (na: number, nb: number) => {
+    if (!coDone && (na === coPoint || nb === coPoint)) {
+      setCoDone(true);
+      setChangeover(true);
+    }
+    const win =
+      Math.max(na, nb) >= live.target && (!live.winBy2 || Math.abs(na - nb) >= 2);
+    if (win && !endDismissed.current) setEndAsk(true);
+  };
+
+  const pointFor = (team: 0 | 1) => {
+    const na = team === 0 ? live.a + 1 : live.a;
+    const nb = team === 1 ? live.b + 1 : live.b;
+    push(team === 0 ? { a: na } : { b: nb });
+    afterScore(na, nb);
+  };
 
   const scoreForServing = () => {
-    const inc = live.serveTeam === 0 ? { a: live.a + 1 } : { b: live.b + 1 };
-    push({ ...inc, serverIdx: doubles ? 1 - live.serverIdx : live.serverIdx });
+    const na = live.serveTeam === 0 ? live.a + 1 : live.a;
+    const nb = live.serveTeam === 1 ? live.b + 1 : live.b;
+    push({
+      ...(live.serveTeam === 0 ? { a: na } : { b: nb }),
+      serverIdx: doubles ? 1 - live.serverIdx : live.serverIdx,
+    });
+    afterScore(na, nb);
   };
+
+  const startTimer = (label: string, secs: number) => setTimer({ label, left: secs });
+  const mmss = (t: number) =>
+    `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
 
   const sideOut = () => {
     if (doubles && live.serverNum === 1) {
@@ -415,23 +440,55 @@ function LiveScoringPage() {
       </div>
 
       <div className="flex items-center justify-between gap-2 border-t border-line/10 px-3 py-2 text-[11px] font-semibold">
-        <div className="flex items-center gap-2">
-          <span className="text-line/50">{entryName(teamA)}</span>
+        <div className="flex items-center gap-1.5">
+          <span className="max-w-[90px] truncate text-line/50">{entryName(teamA)}</span>
           <button
-            className="rounded-md bg-white/70 px-2 py-1 ring-1 ring-black/5"
-            onClick={() => setLive({ toUsed: [live.toUsed[0] + 1, live.toUsed[1]] })}
+            className="rounded-md bg-card px-2 py-1 ring-1 ring-line/20"
+            onClick={() => {
+              setLive({ toUsed: [live.toUsed[0] + 1, live.toUsed[1]] });
+              startTimer(`Hội ý · ${entryName(teamA)}`, live.timeoutSeconds);
+            }}
           >
             ⏱ Hội ý {live.timeoutsPerTeam - live.toUsed[0]}
           </button>
-        </div>
-        <div className="flex items-center gap-2">
           <button
-            className="rounded-md bg-white/70 px-2 py-1 ring-1 ring-black/5"
-            onClick={() => setLive({ toUsed: [live.toUsed[0], live.toUsed[1] + 1] })}
+            className="rounded-md bg-destructive px-2 py-1 text-destructive-foreground"
+            onClick={() => {
+              setLive({ medUsed: [live.medUsed[0] + 1, live.medUsed[1]] });
+              startTimer(`Y tế · ${entryName(teamA)}`, live.medicalSeconds);
+            }}
+          >
+            MED
+          </button>
+        </div>
+
+        <button
+          className="rounded-md bg-secondary px-2.5 py-1 ring-1 ring-line/20"
+          onClick={() => setNoteOpen(true)}
+        >
+          📝 Note
+        </button>
+
+        <div className="flex items-center gap-1.5">
+          <button
+            className="rounded-md bg-destructive px-2 py-1 text-destructive-foreground"
+            onClick={() => {
+              setLive({ medUsed: [live.medUsed[0], live.medUsed[1] + 1] });
+              startTimer(`Y tế · ${entryName(teamB)}`, live.medicalSeconds);
+            }}
+          >
+            MED
+          </button>
+          <button
+            className="rounded-md bg-card px-2 py-1 ring-1 ring-line/20"
+            onClick={() => {
+              setLive({ toUsed: [live.toUsed[0], live.toUsed[1] + 1] });
+              startTimer(`Hội ý · ${entryName(teamB)}`, live.timeoutSeconds);
+            }}
           >
             ⏱ Hội ý {live.timeoutsPerTeam - live.toUsed[1]}
           </button>
-          <span className="text-line/50">{entryName(teamB)}</span>
+          <span className="max-w-[90px] truncate text-line/50">{entryName(teamB)}</span>
         </div>
       </div>
 
@@ -449,6 +506,68 @@ function LiveScoringPage() {
           Kết thúc
         </button>
       </div>
+
+      {timer ? (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-ink/85 text-paper">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em]">{timer.label}</p>
+          <p className="mt-3 font-head text-7xl font-bold tabular-nums">{mmss(timer.left)}</p>
+          <button className="btn-accent mt-6" onClick={() => setTimer(null)}>
+            {timer.left <= 0 ? "Tiếp tục thi đấu" : "Kết thúc sớm"}
+          </button>
+        </div>
+      ) : null}
+
+      {changeover ? (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-ink/85 px-6 text-center text-paper">
+          <p className="font-head text-3xl font-bold uppercase tracking-tight">Đổi sân</p>
+          <p className="mt-2 text-sm opacity-80">
+            Một đội đã đạt {coPoint} điểm — nhắc hai đội đổi sân.
+          </p>
+          <button className="btn-accent mt-6" onClick={() => setChangeover(false)}>
+            Đã đổi sân
+          </button>
+        </div>
+      ) : null}
+
+      {endAsk ? (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-ink/90 px-6 text-center text-paper">
+          <p className="font-head text-3xl font-bold uppercase tracking-tight">Kết thúc trận?</p>
+          <p className="mt-2 text-sm opacity-80">
+            {entryName(teamA)} {live.a} — {live.b} {entryName(teamB)}
+          </p>
+          <div className="mt-6 flex gap-2">
+            <button
+              className="btn-ghost"
+              onClick={() => {
+                endDismissed.current = true;
+                setEndAsk(false);
+              }}
+            >
+              Chơi tiếp
+            </button>
+            <button className="btn-accent" onClick={() => finish(match, live.a, live.b)}>
+              Kết thúc trận
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {noteOpen ? (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-ink/80 px-6">
+          <div className="w-full max-w-md rounded-xl bg-card p-4">
+            <p className="font-head text-lg font-bold uppercase tracking-tight">Ghi chú trọng tài</p>
+            <textarea
+              className="field mt-3 h-40 resize-none"
+              placeholder="Ghi chú sự cố, chấn thương, khiếu nại..."
+              value={live.note}
+              onChange={(e) => setLive({ note: e.target.value })}
+            />
+            <button className="btn-accent mt-3 w-full" onClick={() => setNoteOpen(false)}>
+              Xong
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
